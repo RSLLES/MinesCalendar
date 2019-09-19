@@ -1,5 +1,6 @@
 import requests
 import datetime
+from bs4 import BeautifulSoup
 
 # 1) Construction de l'URL où se trouve l'edt
 n = 2 #Modifiable, nombre de semaines à prendre à l'avance
