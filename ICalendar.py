@@ -11,15 +11,31 @@ urls = [f"https://sgs-2.mines-paristech.fr/prod/oasis/ensmp/Page/TimeTableView.p
 # Class contenant un évènement
 class evenement:
     def __init__(self, date):
-        pass
+        self.date = date
 
+    def HeureDebut(self, heureDebut):
+        self.heureDebut = heureDebut
+
+    def HeureFin(self, heureFin):
+        self.heureFin = heureFin
+
+    def Nom(self, nom):
+        self.nom = nom
+    
 allEvenements = []
 for url in urls:
     soup = BeautifulSoup(requests.get(url).text, features="html.parser")
     jours = soup.findAll("div", {"class": "timetable-day-wrapper"})
-    print(len(jours))
     for jour in jours:
-        date = jour.findAll("div", {"class": "timetable-day-title"})
-        print(date)
+        date = jour.find("div", {"class": "timetable-day-title"}).text
+        allCours = jour.findAll("div", {'class': "timetable-day-body"})
+        for cours in allCours:
+            e = evenement(date)
+            e.HeureDebut(cours.find("div", {"class": "timetable-day-time-start"}).text)
+            e.heureFin(cours.find("div", {"class": "timetable-day-time-end"}).text)
+            e.Nom(cours.find("div", {"class": "timetable-session-course-title"}).text)
+
+            groupes = cours.findAll("div", {"class": "timetable-day-time-start"}).text
+
 
     
