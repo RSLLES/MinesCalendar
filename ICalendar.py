@@ -3,6 +3,7 @@ import datetime
 from bs4 import BeautifulSoup
 from icalendar import Calendar, Event
 import pytz
+import uuid
 
 # 1) Construction de l'URL où se trouve l'edt
 n = 1  # Modifiable, nombre de semaines à prendre à l'avance
@@ -22,13 +23,22 @@ class evenement:
         self.day, self.month, self.year = int(jour), dictMois[mois], annee
 
     def HeureDebut(self, heureDebut):
-        self.event.add('dtstart', datetime.datetime(day = self.day, month = self.month, year = self.year, hour = int(heureDebut.split("h")[0]), minute = int(heureDebut.split("h")[1]), tzinfo=pytz.utc))
+        self.dtstart = datetime.datetime(day = self.day, month = self.month, year = self.year, hour = int(heureDebut.split("h")[0]), minute = int(heureDebut.split("h")[1]), tzinfo=pytz.utc)
+        self.event.add('dtstart', self.dtstart)
 
     def HeureFin(self, heureFin):
-        self.event.add('dtend', datetime.datetime(day = self.day, month = self.month, year = self.year, hour = int(heureFin.split("h")[0]), minute = int(heureFin.split("h")[1]), tzinfo=pytz.utc))
+        self.dtend = datetime.datetime(day = self.day, month = self.month, year = self.year, hour = int(heureFin.split("h")[0]), minute = int(heureFin.split("h")[1]), tzinfo=pytz.utc)
+        self.event.add('dtend', self.dtend)
 
     def Nom(self, nom):
         self.event.add("summary", nom)
+        self.event.add('uid', str(uuid.uuid1(node = self.ToInt(nom))))
+    
+    def ToInt(self, str):
+        l = 0
+        for lettre in str:
+            l += ord(lettre)
+        return l
 
     def Groupes(self, groupes):
         self.event.add("description", groupes)
