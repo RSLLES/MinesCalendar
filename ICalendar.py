@@ -2,7 +2,7 @@ import requests
 import datetime
 from bs4 import BeautifulSoup
 from icalendar import Calendar, Event
-
+import pytz
 
 # 1) Construction de l'URL où se trouve l'edt
 n = 1  # Modifiable, nombre de semaines à prendre à l'avance
@@ -18,42 +18,26 @@ class evenement:
         self.event = Event()
         jour, mois = date.split(' ')[1:]
         dictMois = {"janvier": 1, "février": 2, "mars": 3, "avril": 4, "mai": 5, "juin": 6, "juillet": 7, "août" :8, "septembre" : 9, "octobre" : 10, "novembre" : 11, "décembre" : 12}
-        self.date = datetime.datetime(day = int(jour), month = dictMois[mois], year = annee)
-        print(date)
-        print(self.date)
-
-    def ICS(self):
-        """Méthode qui retourne sous string le texte à mettre dans le fichier ICS"""
-        pass
-
-    def Date(self, date):
-        self.event.add("date", )
+        self.day, self.month, self.year = int(jour), dictMois[mois], annee
 
     def HeureDebut(self, heureDebut):
-        self.heureDebut = heureDebut
+        self.event.add('dtstart', datetime.datetime(day = self.day, month = self.month, year = self.year, hour = int(heureDebut.split("h")[0]), minute = int(heureDebut.split("h")[1]), tzinfo=pytz.utc))
 
     def HeureFin(self, heureFin):
-        self.heureFin = heureFin
+        self.event.add('dtend', datetime.datetime(day = self.day, month = self.month, year = self.year, hour = int(heureFin.split("h")[0]), minute = int(heureFin.split("h")[1]), tzinfo=pytz.utc))
 
     def Nom(self, nom):
-        self.nom = nom
+        self.event.add("summary", nom)
 
     def Groupes(self, groupes):
-        self.groupes = groupes
-
-    def Print(self):
-        L = f"Le {self.date} de {self.heureDebut} a {self.heureFin}:\n"
-        L += self.nom
-        L += "\n"
-        L += self.groupes
-        print(L)
+        self.event.add("description", groupes)
 
 
 allEvenements = []
 for url in urls:
     soup = BeautifulSoup(requests.get(url).text, features="html.parser")
     jours = soup.findAll("div", {"class": "timetable-day-wrapper"})
-    annee = int(soup.find("div", {"class": "timetable-week-title"}).split(' ')[-1]) #Probleme
+    annee = int(soup.find("div", {"class": "timetable-week-title"}).text[-5:])
     for jour in jours:
         date = jour.find("div", {"class": "timetable-day-title"}).text
         allCours = jour.findAll("div", {'class': "timetable-day-body"})
@@ -80,3 +64,11 @@ for url in urls:
             allEvenements.append(e)
 
 #3) On va a présent créer le fichier et ajouter les évnénements
+cal = Calendar()
+cal.add('prodid', '-//Calendrier Mines//mxm.dk//')
+cal.add('version', '2.0')
+for e in allEvenements:
+    cal.add_component(e.event)
+f = open('course_schedule.ics', 'wb')
+f.write(cal.to_ical())
+f.close()
