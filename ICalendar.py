@@ -7,8 +7,8 @@ import uuid
 
 # 1) Construction de l'URL où se trouve l'edt
 decalage_horaire = 2 #Decalage horaire
-n = 2  # Modifiable, nombre de semaines à prendre à l'avance
-dates = [datetime.datetime.now() + datetime.timedelta(days=7*k + 2)
+n = 1  # Modifiable, nombre de semaines à prendre à l'avance
+dates = [datetime.datetime.now() + datetime.timedelta(days=7*(k+1) + 2)
          for k in range(n)]
 urls = [
     f"https://sgs-2.mines-paristech.fr/prod/oasis/ensmp/Page/TimeTableView.php?year_in_cursus=1&date={date.year}-{date.month}-{date.day}" for date in dates]
@@ -78,6 +78,54 @@ cal.add('version', '2.0')
 cal.add('prodid', '-//Calendrier Mines//mxm.dk//')
 for e in allEvenements:
     cal.add_component(e.event)
-f = open(str(datetime.datetime.now().date()).replace("-", "_") + '.ics', 'wb')
+now = datetime.datetime.now() + datetime.timedelta(days=8)
+titre = f"Semaine_du_{now.day}_{now.month}_{now.year}"
+f = open(titre + ".ics", 'wb')
 f.write(cal.to_ical())
 f.close()
+
+
+#4) On envoie par wetransfer le mail
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email import encoders
+from email.mime.base import MIMEBase
+
+fromaddr = "MinesCalendar@gmx.fr"
+toaddr = "romain.seailles@mines-paristech.fr"
+msg = MIMEMultipart()
+msg['From'] = fromaddr
+msg['To'] = toaddr
+msg['Subject'] = f"[Emploi du temps] Semaine du {now.day}/{now.month}/{now.year}"
+
+body = "Ca marche toujours et oui"
+msg.attach(MIMEText(body, 'plain'))
+
+filename = titre + ".ics"
+# Open PDF file in binary mode
+with open(filename, "rb") as attachment:
+    # Add file as application/octet-stream
+    # Email client can usually download this automatically as attachment
+    part = MIMEBase("application", "octet-stream")
+    part.set_payload(attachment.read())
+
+# Encode file in ASCII characters to send by email    
+encoders.encode_base64(part)
+
+# Add header as key/value pair to attachment part
+part.add_header(
+    "Content-Disposition",
+    f"attachment; filename= {filename}",
+)
+
+# Add attachment to message and convert message to string
+msg.attach(part)
+
+import smtplib
+server = smtplib.SMTP('mail.gmx.com', 25)
+server.ehlo()
+server.starttls()
+server.ehlo()
+server.login("minescalendar@gmx.fr", "MinesDeParis")
+text = msg.as_string()
+server.sendmail(fromaddr, toaddr, text)
