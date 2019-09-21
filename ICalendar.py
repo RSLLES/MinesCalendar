@@ -6,8 +6,9 @@ import pytz
 import uuid
 
 # 1) Construction de l'URL où se trouve l'edt
-n = 1  # Modifiable, nombre de semaines à prendre à l'avance
-dates = [datetime.datetime.now() + datetime.timedelta(days=7*k)
+decalage_horaire = 2 #Decalage horaire
+n = 2  # Modifiable, nombre de semaines à prendre à l'avance
+dates = [datetime.datetime.now() + datetime.timedelta(days=7*k + 2)
          for k in range(n)]
 urls = [
     f"https://sgs-2.mines-paristech.fr/prod/oasis/ensmp/Page/TimeTableView.php?year_in_cursus=1&date={date.year}-{date.month}-{date.day}" for date in dates]
@@ -17,28 +18,24 @@ urls = [
 class evenement:
     def __init__(self, date, annee):
         self.event = Event()
-        self.event.add("dtstamp", datetime.datetime.now())
+        self.event.add("dtstamp", datetime.datetime.now() - datetime.timedelta(hours=decalage_horaire))
+        self.event.add("created", datetime.datetime.now() - datetime.timedelta(hours=decalage_horaire))
         jour, mois = date.split(' ')[1:]
         dictMois = {"janvier": 1, "février": 2, "mars": 3, "avril": 4, "mai": 5, "juin": 6, "juillet": 7, "août" :8, "septembre" : 9, "octobre" : 10, "novembre" : 11, "décembre" : 12}
         self.day, self.month, self.year = int(jour), dictMois[mois], annee
 
     def HeureDebut(self, heureDebut):
-        self.dtstart = datetime.datetime(day = self.day, month = self.month, year = self.year, hour = int(heureDebut.split("h")[0]), minute = int(heureDebut.split("h")[1]), tzinfo=pytz.utc)
+        self.dtstart = datetime.datetime(day = self.day, month = self.month, year = self.year, hour = int(heureDebut.split("h")[0]), minute = int(heureDebut.split("h")[1]), tzinfo=pytz.utc) - datetime.timedelta(hours=decalage_horaire)
         self.event.add('dtstart', self.dtstart)
 
     def HeureFin(self, heureFin):
-        self.dtend = datetime.datetime(day = self.day, month = self.month, year = self.year, hour = int(heureFin.split("h")[0]), minute = int(heureFin.split("h")[1]), tzinfo=pytz.utc)
+        self.dtend = datetime.datetime(day = self.day, month = self.month, year = self.year, hour = int(heureFin.split("h")[0]), minute = int(heureFin.split("h")[1]), tzinfo=pytz.utc) - datetime.timedelta(hours=decalage_horaire)
         self.event.add('dtend', self.dtend)
 
     def Nom(self, nom):
         self.event.add("summary", nom)
-        self.event.add('uid', str(uuid.uuid1(node = self.ToInt(nom))))
+        self.event.add('uid', str(uuid.uuid4()))
     
-    def ToInt(self, str):
-        l = 0
-        for lettre in str:
-            l += ord(lettre)
-        return l
 
     def Groupes(self, groupes):
         self.event.add("description", groupes)
@@ -76,10 +73,11 @@ for url in urls:
 
 #3) On va a présent créer le fichier et ajouter les évnénements
 cal = Calendar()
-cal.add('prodid', '-//Calendrier Mines//mxm.dk//')
+
 cal.add('version', '2.0')
+cal.add('prodid', '-//Calendrier Mines//mxm.dk//')
 for e in allEvenements:
     cal.add_component(e.event)
-f = open('course_schedule.ics', 'wb')
+f = open(str(datetime.datetime.now().date()).replace("-", "_") + '.ics', 'wb')
 f.write(cal.to_ical())
 f.close()
