@@ -16,6 +16,7 @@ urls = [
 class evenement:
     def __init__(self, date, annee):
         self.event = Event()
+        self.event.add("dtstamp", datetime.datetime.now())
         jour, mois = date.split(' ')[1:]
         dictMois = {"janvier": 1, "février": 2, "mars": 3, "avril": 4, "mai": 5, "juin": 6, "juillet": 7, "août" :8, "septembre" : 9, "octobre" : 10, "novembre" : 11, "décembre" : 12}
         self.day, self.month, self.year = int(jour), dictMois[mois], annee
