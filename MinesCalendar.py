@@ -1,3 +1,4 @@
+# -*- encoding: utf-8 -*-
 import requests
 import datetime
 from bs4 import BeautifulSoup
@@ -11,7 +12,7 @@ n = 1  # Modifiable, nombre de semaines à prendre à l'avance
 dates = [datetime.datetime.now() + datetime.timedelta(days=7*(k+1) + 2)
          for k in range(n)]
 urls = [
-    f"https://sgs-2.mines-paristech.fr/prod/oasis/ensmp/Page/TimeTableView.php?year_in_cursus=1&date={date.year}-{date.month}-{date.day}" for date in dates]
+    "https://sgs-2.mines-paristech.fr/prod/oasis/ensmp/Page/TimeTableView.php?year_in_cursus=1&date=" + str(date.year) + "-" + str(date.month) + "-" + str(date.day) for date in dates]
 
 # 2) Extraction des données
 # Class contenant un évènement
@@ -79,7 +80,7 @@ cal.add('prodid', '-//Calendrier Mines//mxm.dk//')
 for e in allEvenements:
     cal.add_component(e.event)
 now = datetime.datetime.now() + datetime.timedelta(days=8)
-titre = f"Semaine_du_{now.day}_{now.month}_{now.year}"
+titre = "Semaine_du_"+ str(now.day) + "_" + str(now.month) + "_" + str(now.year)
 f = open(titre + ".ics", 'wb')
 f.write(cal.to_ical())
 f.close()
@@ -96,7 +97,7 @@ toaddr = "romain.seailles@mines-paristech.fr"
 msg = MIMEMultipart()
 msg['From'] = fromaddr
 msg['To'] = toaddr
-msg['Subject'] = f"[Emploi du temps] Semaine du {now.day}/{now.month}/{now.year}"
+msg['Subject'] = "[Emploi du temps] Semaine du  " + str(now.day) + "/" + str(now.month) + "/" + str(now.year)
 
 body = "Ca marche toujours et oui"
 msg.attach(MIMEText(body, 'plain'))
@@ -115,7 +116,7 @@ encoders.encode_base64(part)
 # Add header as key/value pair to attachment part
 part.add_header(
     "Content-Disposition",
-    f"attachment; filename= {filename}",
+    "attachment; filename= " + str(filename),
 )
 
 # Add attachment to message and convert message to string
