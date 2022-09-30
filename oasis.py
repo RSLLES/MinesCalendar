@@ -1,6 +1,7 @@
-import requests
 import ics
 import json
+import fire
+import requests
 from bs4 import BeautifulSoup
 
 headers = {'Content-Type': 'application/x-www-form-urlencoded'}
@@ -10,11 +11,7 @@ uuid = "421546789512"
 timezone = "Europe/Paris"
 
 URL_LOGIN = r'https://oasis.mines-paristech.fr/prod/bo/core/Router/Ajax/ajax.php?targetProject=oasis_ensmp&route=BO\Connection\User::login'
-DATA_LOGIN = "login=romain.seailles&password=Romain1705!mpt&url=type=HOME&codepage=HOME"
-
 URL_CALENDAR = r'https://oasis.mines-paristech.fr/prod/bo/core/Router/Ajax/ajax.php?targetProject=oasis_ensmp&route=Oasis\Common\Model\TimeAndSpace\Calendar\Calendar::element_feeder'
-DATA_CALENDAR = 'courseCodes=ECUE51.1,ECUE51.2,ECUE52.1,MASTER_S5,ESMI_STE-09,ECUE55.1,ADMIN5,ECUE56.1,ECUE61.1,ECUE61.2,ECUE61.3,ECUE61.4,ECUE62.1,ECUE62.2,ECUE62.3,ECUE65.1,ECUE65.2&vg=MTlzZWFpbGxlcw%3D%3D&elementType=course_program&courseScope=ALL&roomTypes=&start=2022-09-26T00:00:00&end=2022-10-23T00:00:00'
-
 URL_UE = r'https://oasis.mines-paristech.fr/prod/bo/core/Router/Ajax/ajax.php?targetProject=oasis_ensmp&route=BO\\Layout\\MainContent::load&codepage=MYCHOICES'
 
 #############
@@ -34,8 +31,8 @@ def format(text):
 ### Methods ###
 ###############
 
-def get_cookies():
-    return post(url= URL_LOGIN, data= DATA_LOGIN).cookies
+def get_cookies(login_payload):
+    return post(url= URL_LOGIN, data= login_payload).cookies
 
 def get_timetable(cookies, payload):
     return post(
@@ -84,12 +81,16 @@ def timezone(events):
         event.begin = event.begin.replace(tzinfo='Europe/Paris').to('utc')
         event.end = event.end.replace(tzinfo='Europe/Paris').to('utc')
 
+def get_login_payload(login, password):
+    return f"login={login}&password={password}&url=type=HOME&codepage=HOME"
+
 ############
 ### Main ###
 ############
 
-def main():
-    cookies = get_cookies()
+def main(login, password):
+    login_payload = get_login_payload(login= login, password= password)
+    cookies = get_cookies(login_payload = login_payload)
     all_ue = get_all_ue(cookies= cookies)
     calendar_payload = get_calendar_payload(ues= all_ue)
     timetable = filter_courses(get_timetable(cookies= cookies, payload= calendar_payload))
@@ -110,4 +111,4 @@ def main():
 ###################
 
 if __name__ == '__main__':
-    main()
+    fire.Fire(main)
