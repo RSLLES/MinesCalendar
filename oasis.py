@@ -98,11 +98,9 @@ def main():
     timezone(events)
 
     calendar = ics.Calendar(
-        creator= uuid
+        creator= uuid,
+        events= events
     )
-
-    for i, e in enumerate(events):
-        calendar.events.add(e)
 
     with open('oasis.ics', 'w', encoding='utf-8') as f:
         f.writelines(calendar.serialize_iter())
