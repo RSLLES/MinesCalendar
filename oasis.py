@@ -8,6 +8,7 @@ headers = {'Content-Type': 'application/x-www-form-urlencoded'}
 first_scrap_day = "2022-09-01"
 last_scrap_day = "2023-06-01"
 uuid = "421546789512"
+timezone = "Europe/Paris"
 
 URL_LOGIN = r'https://oasis.mines-paristech.fr/prod/bo/core/Router/Ajax/ajax.php?targetProject=oasis_ensmp&route=BO\Connection\User::login'
 DATA_LOGIN = "login=romain.seailles&password=Romain1705!mpt&url=type=HOME&codepage=HOME"
@@ -79,6 +80,11 @@ def create_event(event_json):
         end = event_json['end']
     )
 
+def timezone(events):
+    for event in events:
+        event.begin = event.begin.replace(tzinfo='Europe/Paris').to('utc')
+        event.end = event.end.replace(tzinfo='Europe/Paris').to('utc')
+
 ############
 ### Main ###
 ############
@@ -89,6 +95,7 @@ def main():
     calendar_payload = get_calendar_payload(ues= all_ue)
     timetable = filter_courses(get_timetable(cookies= cookies, payload= calendar_payload))
     events = [create_event(event_json) for event_json in timetable]
+    timezone(events)
 
     calendar = ics.Calendar(
         creator= uuid
@@ -97,7 +104,7 @@ def main():
     for i, e in enumerate(events):
         calendar.events.add(e)
 
-    with open('oasis.ics', 'w') as f:
+    with open('oasis.ics', 'w', encoding='utf-8') as f:
         f.writelines(calendar.serialize_iter())
 
 
