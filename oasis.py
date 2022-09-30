@@ -1,7 +1,6 @@
 import requests
 import ics
 import json
-import arrow
 from bs4 import BeautifulSoup
 
 headers = {'Content-Type': 'application/x-www-form-urlencoded'}
