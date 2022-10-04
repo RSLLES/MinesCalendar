@@ -1,3 +1,4 @@
+import re
 import ics
 import json
 import fire
@@ -9,6 +10,7 @@ first_scrap_day = "2022-09-01"
 last_scrap_day = "2023-06-01"
 uuid = "421546789512"
 timezone = "Europe/Paris"
+regex = re.compile(r"<br/?>", re.IGNORECASE)
 
 URL_LOGIN = r'https://oasis.mines-paristech.fr/prod/bo/core/Router/Ajax/ajax.php?targetProject=oasis_ensmp&route=BO\Connection\User::login'
 URL_CALENDAR = r'https://oasis.mines-paristech.fr/prod/bo/core/Router/Ajax/ajax.php?targetProject=oasis_ensmp&route=Oasis\Common\Model\TimeAndSpace\Calendar\Calendar::element_feeder'
@@ -25,7 +27,7 @@ def get(url, cookies = None):
     return requests.get(url, cookies=cookies)
 
 def format(text):
-    return BeautifulSoup(text, "html.parser").text
+    return BeautifulSoup(re.sub(regex, '\n', text), "html.parser").text
 
 ###############
 ### Methods ###
