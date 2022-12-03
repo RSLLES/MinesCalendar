@@ -360,7 +360,7 @@ UID:95619
 END:VEVENT
 BEGIN:VEVENT
 DESCRIPTION:Groupe 5 : V106BGroupe 1 : 3 - MDM_FGroupe 2 : V106A (+++)Groupe 3 : L213 (+++)Groupe 4 : L218 (+++)Groupe 6 : L224 (+++)
-DTEND:20230217T091500Z
+DTEND:20230217T111500Z
 DTSTART:20230217T074500Z
 SUMMARY:PC5
 UID:95994
@@ -778,7 +778,7 @@ SUMMARY:Controverses
 UID:91281
 END:VEVENT
 BEGIN:VEVENT
-DESCRIPTION:Groupe 1 : L027Groupe 2 : L226 (+++)Groupe 3 : L224 (+++)Groupe 4 : L213 (+++)Groupe 5 : L218 (+++)Groupe 6 : L316 (+++)Groupe 7 : BIBLIOGroupe 8 : V116
+DESCRIPTION:Groupe 1 : L312 (+++)Groupe 2 : L226 (+++)Groupe 3 : L224 (+++)Groupe 4 : L213 (+++)Groupe 5 : L218 (+++)Groupe 6 : L316 (+++)Groupe 7 : BIBLIOGroupe 8 : V116
 DTEND:20221215T111500Z
 DTSTART:20221215T094500Z
 SUMMARY:Controverses
